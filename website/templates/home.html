@@ -1,0 +1,66 @@
+{% extends "base.html" %} 
+{% block title %}Home{% endblock %} 
+{% block content %}
+<h1 align="center">Notes</h1>
+<ul class="list-group list-group-flush" id="notes">
+  {% for note in notes %}
+  <li class="list-group-item" id="note-{{ note.id }}">
+    <div id="note-display-{{ note.id }}">
+      <span>{{ note.data }}</span>
+      <div class="d-flex">
+        <button type="button" class="btn btn-link mr-2" onClick="showUpdateInput({{ note.id }})">
+          <i class="fa fa-pencil"></i>
+        </button>
+        <button type="button" class="btn btn-link" onClick="deleteNote({{ note.id }})">
+          <i class="fa fa-trash"></i>
+        </button>
+      </div>
+    </div>
+    <div id="update-note-input-{{ note.id }}" style="display: none;">
+      <textarea class="form-control" id="update-textarea-{{ note.id }}">{{ note.data }}</textarea>
+      <button type="button" class="btn btn-primary mt-2" onClick="updateNote({{ note.id }})">Update</button>
+      <button type="button" class="btn btn-secondary mt-2" onClick="cancelUpdate({{ note.id }})">Cancel</button>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+
+<form method="POST" id="add-note-form">
+  <textarea name="note" id="note" class="form-control"></textarea>
+  <br />
+  <div align="center">
+    <button type="submit" class="btn btn-primary">Add Note</button>
+  </div>
+</form>
+
+<script type="text/javascript">
+  function deleteNote(noteId) {
+    fetch("/delete-note", {
+      method: "POST",
+      body: JSON.stringify({ noteId: noteId }),
+    }).then((_res) => {
+      window.location.href = "/";
+    });
+  }
+
+  function showUpdateInput(noteId) {
+    document.getElementById("note-display-" + noteId).style.display = "none";
+    document.getElementById("update-note-input-" + noteId).style.display = "block";
+  }
+
+  function cancelUpdate(noteId) {
+    document.getElementById("update-note-input-" + noteId).style.display = "none";
+    document.getElementById("note-display-" + noteId).style.display = "block";
+  }
+
+  function updateNote(noteId) {
+    const updatedNote = document.getElementById("update-textarea-" + noteId).value;
+    fetch("/update-note", {
+      method: "POST",
+      body: JSON.stringify({ noteId: noteId, newData: updatedNote }),
+    }).then((_res) => {
+      window.location.href = "/";
+    });
+  }
+</script>
+{% endblock %}
